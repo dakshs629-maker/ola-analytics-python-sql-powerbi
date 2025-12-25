@@ -24,5 +24,7 @@ This project builds end-to-end analysis of Ola ride data using SQL for explorati
 ## Key Insights
 - City A and City B generate over 60% of total revenue.
 - Evening time slots show the highest ride volume across all cities.
-
 - Cancellation rates are highest in XYZ conditions (e.g., peak hours / specific city).
+
+Disclaimer: This project is an independent educational analysis using synthetic data and is not affiliated with Ola or ANI Technologies.
+
