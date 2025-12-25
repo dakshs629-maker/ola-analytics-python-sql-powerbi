@@ -1,6 +1,6 @@
 Ola Ride Analytics Dashboard (Power BI & SQL)
 
-End‑to‑end data analytics project simulating a ride‑hailing company in Bengaluru, using a synthetic dataset of 100k+ rides for one month to analyze demand, revenue, cancellations, and service quality.
+End‑to‑end data analytics project simulating a ride‑hailing company in Bengaluru, using a synthetic dataset of 100k+ rides for one month to analyze demand, revenue, cancellations, and service quality, similar to what an entry-level data analyst would do in a mobility company.
 
 ​Note: Data is fully synthetic and generated via LLM prompts for learning; this project is not affiliated with Ola or ANI Technologies Pvt. Ltd.
 
@@ -34,9 +34,20 @@ Each record represents one ride with: date/time, booking and customer IDs, booki
 ​      >Vehicle & revenue – top vehicle types by distance, revenue by payment method, top customers by booking value, ride distance distribution per day.
 ​      >Cancellations – reasons for customer and driver cancellations.
 ​      >Ratings – distributions of driver and customer ratings and a customer‑vs‑driver rating comparison.
-​
 
--Tech stack
+-Python exploration
+#The ola_python_analysis.ipynb notebook contains additional EDA using pandas, seaborn, and matplotlib, including booking‑value distributions, cancellation breakdowns for Prime Sedan rides, and relationships between booking value and VTAT.
+​
+​-Tech stack
 
 #SQL: data querying and creation of analytical views.
 ​#Power BI: data modelling and interactive dashboards.
+
+-How to run
+
+#Clone the repo and open Bookings.csv in your SQL/BI environment.
+​#Run Ola.sql to create the database, table, and analysis views.
+​#Open Ola Data Analyst.pbix in Power BI and refresh the data source.
+​#Open ola_python_analysis.ipynb to explore the pandas/seaborn analysis.
+​
+
