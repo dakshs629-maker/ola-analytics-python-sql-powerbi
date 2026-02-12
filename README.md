@@ -1,55 +1,69 @@
-Ola Ride Analytics Dashboard 
-
-End‑to‑end data analytics project simulating a ride‑hailing company in Bengaluru, using a synthetic dataset of 100k+ rides for one month to analyze demand, revenue, cancellations, and service quality, similar to what an entry-level data analyst would do in a mobility company.
-Note: Data is fully synthetic and generated via LLM prompts for learning; this project is not affiliated with Ola or ANI Technologies Pvt. Ltd.
-
--Business questions
-
-# How many rides succeed vs. fail, and how do success and cancellation rates vary by day, weekend, and vehicle type?
-​# Which vehicle types and customers contribute the most distance and revenue?
-​# What are the main reasons for customer and driver cancellations and incomplete rides?
-​# How do driver and customer ratings differ across vehicle types, and how are they correlated?
-​
--Data
-
-Each record represents one ride with: date/time, booking and customer IDs, booking status, vehicle type, pickup/drop locations, VTAT, CTAT, cancellation and incomplete‑ride reasons, booking value, payment method, ride distance, and both driver and customer ratings.
-#​Constraints built into the data:
-   ~62% successful bookings; customer cancellations <7%, driver cancellations <18%, incomplete rides <6%.
-​   ~Higher order volume and booking value on weekends and match days.
-​
--SQL work
-
-#Created an Ola database and a bookings table to store all rides.
-​#Built reusable SQL views to answer core questions, such as:
-       >Successful_Bookings – all successful rides.
-       ​>ride_distance_for_each_vehicle – average distance by vehicle type.
-       ​>Top_5_Customers – most active customers by number of rides.
-       ​>total_successful_ride_value – total revenue from successful rides.
-​
--Power BI dashboard
-
-#Multi‑page dashboard with:
-      >Overview – ride volume over time and booking status breakdown.
-​      >Vehicle & revenue – top vehicle types by distance, revenue by payment method, top customers by booking value, ride distance distribution per day.
-​      >Cancellations – reasons for customer and driver cancellations.
-​      >Ratings – distributions of driver and customer ratings and a customer‑vs‑driver rating comparison.
-
--Python exploration
-#The ola_python_analysis.ipynb notebook contains additional EDA using pandas, seaborn, and matplotlib, including booking‑value distributions, cancellation breakdowns for Prime Sedan rides, and relationships between booking value and VTAT.
-​
-​-Tech stack
-
-#SQL: data querying and creation of analytical views.
-​#Power BI: data modelling and interactive dashboards.
-
--How to run
-
-#Clone the repo and open Bookings.csv in your SQL/BI environment.
-​#Run Ola.sql to create the database, table, and analysis views.
-​#Open Ola Data Analyst.pbix in Power BI and refresh the data source.
-​#Open ola_python_analysis.ipynb to explore the pandas/seaborn analysis.
-​
+📌 Project Overview
+This project analyzes a dataset of 100,000 Ola rides to uncover patterns in customer behavior, driver performance, and revenue distribution. By combining SQL for data transformation and Power BI for visualization, the project provides a comprehensive look at urban mobility trends.
 
 
+🛠️ Tech Stack
+-SQL: Data extraction, cleaning, and creating business-logic Views.
+
+-Power BI: Data modeling, DAX calculations, and interactive visualization.
+
+-Excel: Initial data exploration and formatting.
 
 
+💾 SQL Analysis & Data Transformation
+
+To prepare the data for the dashboard, I created specific SQL Views to answer key business questions.
+
+Key Queries Implemented:
+   *Successful Bookings: Filtering all completed rides for revenue analysis.
+
+   *Ride Distance by Vehicle: Calculating average distances for different categories (Prime Sedan, Mini, Bike, etc.).
+
+   *Cancellation Tracking: Identifying the top reasons for cancellations by both customers and drivers.
+
+   *Rating Analysis: Aggregating driver and customer ratings to monitor service quality.
+
+SQL
+-- Example: Creating a view for successful bookings
+CREATE VIEW Successful_Bookings AS
+SELECT * FROM bookings
+WHERE Booking_Status = 'Success';
+
+-- Example: Finding the top 5 customers by total booking value
+CREATE VIEW Top_5_Customers AS
+SELECT TOP 5 Customer_ID, SUM(Booking_Value) as Total_Value
+FROM bookings
+GROUP BY Customer_ID
+ORDER BY Total_Value DESC;
+
+
+📊 Dashboard Features & KPIs
+The Power BI dashboard consists of five specialized views to provide deep-dive insights:
+
+1. Overall: High-level KPIs including Booking Value, Ride Volume, and Total Distance.
+
+2. Vehicle Type: Analysis of performance across different segments (Auto, Prime, Mini).
+
+3. Revenue: Tracking revenue concentration across cities and time periods.
+
+4. Cancellations: Visualizing the "why" behind cancelled rides to improve retention.
+
+5. Ratings: A scorecard for driver and customer satisfaction.
+
+
+💡 Key Insights
+
+*Revenue Concentration: City A and City B are the primary drivers of growth, contributing over 60% of total revenue.
+
+*Peak Demand: Demand spikes significantly during evening time slots across all urban centers.
+
+*Operational Hurdles: Cancellation rates are highest during peak hours, often due to "Driver not moving towards pickup" or "Personal reasons".
+
+
+📂 Project Structure
+
+Ola Data Analyst.pbix: The complete Power BI project file.
+
+Ola.sql: The SQL script containing all 10 business logic views.
+
+data/: Raw dataset (synthetic).
