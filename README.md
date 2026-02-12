@@ -2,8 +2,6 @@
 This project analyzes a dataset of 100,000 Ola rides to uncover patterns in customer behavior, driver performance, and revenue distribution. By combining SQL for data transformation and Power BI for visualization, the project provides a comprehensive look at urban mobility trends.
 
 
-
-
 🛠️ Tech Stack
 -SQL: Data extraction, cleaning, and creating business-logic Views.
 
@@ -69,4 +67,5 @@ Ola Data Analyst.pbix: The complete Power BI project file.
 Ola.sql: The SQL script containing all 10 business logic views.
 
 data/: Raw dataset (synthetic).
+
 
