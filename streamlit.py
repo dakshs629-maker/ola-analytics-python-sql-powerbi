@@ -56,10 +56,12 @@ st.markdown("""
 .section-header {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #e2b96f;
+    color: #cbd5e0;
     margin: 1.2rem 0 0.5rem;
-    border-left: 4px solid #0f3460;
-    padding-left: 0.6rem;
+    border-left: 4px solid #e2b96f;
+    padding: 0.4rem 0.6rem;
+    background: #16213e;
+    border-radius: 0 6px 6px 0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -81,7 +83,16 @@ def inr(num):
     except:
         return str(num)
 
-def metric_card(value, label):
+def indian_num(num):
+    s = str(abs(int(num)))
+    if len(s) <= 3:
+        return s
+    last3 = s[-3:]; rest = s[:-3]; parts = []
+    while len(rest) > 2:
+        parts.append(rest[-2:]); rest = rest[:-2]
+    if rest: parts.append(rest)
+    parts.reverse()
+    return ','.join(parts) + ',' + last3
     return f'<div class="metric-card"><h2>{value}</h2><p>{label}</p></div>'
 
 @st.cache_data
@@ -144,7 +155,7 @@ total_revenue    = successful['Booking_Value'].sum()
 avg_ride_value   = successful['Booking_Value'].mean()
 
 c1, c2, c3, c4 = st.columns(4)
-c1.markdown(metric_card(f"{total_bookings:,}", "Total Bookings"), unsafe_allow_html=True)
+c1.markdown(metric_card(indian_num(total_bookings), "Total Bookings"), unsafe_allow_html=True)
 c2.markdown(metric_card(f"{success_rate:.1f}%", "Booking Success Rate"), unsafe_allow_html=True)
 c3.markdown(metric_card(inr(total_revenue), "Total Revenue"), unsafe_allow_html=True)
 c4.markdown(metric_card(inr(avg_ride_value), "Avg Ride Value"), unsafe_allow_html=True)
@@ -265,8 +276,10 @@ with col6:
     plot_df['Period'] = plot_df['Hour'].apply(lambda h: 'Peak (17–21)' if 17 <= h <= 21 else 'Off-Peak')
     fig, ax = styled_fig(7, 3.5)
     sns.boxplot(x='Period', y='Ride_Distance', data=plot_df, ax=ax,
-                palette={'Peak (17–21)': '#e74c3c', 'Off-Peak': '#3498db'},
-                width=0.45, flierprops=dict(marker='o', markersize=2, alpha=0.3))
+                order=['Off-Peak', 'Peak (17–21)'],
+                hue='Period', palette={'Peak (17–21)': '#e74c3c', 'Off-Peak': '#3498db'},
+                width=0.45, flierprops=dict(marker='o', markersize=2, alpha=0.3),
+                legend=False)
     ax.set_ylabel('Ride Distance (km)', fontsize=9)
     ax.set_xlabel('')
     ax.annotate(f'p = {p_val:.4f}', xy=(0.5, 0.95), xycoords='axes fraction',
