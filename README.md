@@ -2,7 +2,7 @@
 
 A comprehensive data engineering and analytics project simulating a real-world ride-sharing environment in Bangalore. This project covers the full pipeline: **Extraction (SQL)**, **Statistical Validation (Python)**, **Business Intelligence (Power BI)**, and **Interactive Deployment (Streamlit)**.
 
-### 🔗 [Live Interactive Dashboard](https://ola-data-analytics-e9jsowul8qsu99z6odvwbj.streamlit.app/)
+### 🔗 Live Interactive Dashboard: https://ola-data-analytics-e9jsowul8qsu99z6odvwbj.streamlit.app/
 
 ---
 
@@ -81,6 +81,7 @@ This project is currently a **Work-In-Progress**. Future updates will include:
 
 ---
 **Developed by Daksh Sharma** | *Data Analytics & Business Intelligence Portfolio*
+
 
 
 
