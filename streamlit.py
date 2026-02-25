@@ -117,7 +117,6 @@ successful_pay = successful[successful['Payment_Method'].isin(selected_payments)
 
 # ---------- TITLE ----------
 st.title("Ola Ride Analytics")
-st.markdown("<p style='color:gray; margin-top:-0.5rem;'>Bangalore · July 2024 · Interactive Dashboard</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 
