@@ -346,29 +346,63 @@ all_locations = list(set(successful['Pickup_Location'].unique()) | set(successfu
 location_coords = geocode_locations(all_locations)
 
 if location_coords:
+    # Map filter options
+    col_map1, col_map2 = st.columns([3, 1])
+    with col_map2:
+        map_filter = st.radio("Show:", ["Both", "Pickup Only", "Dropoff Only"], horizontal=True)
+    
     # Prepare map data
     map_data = []
     
     # Add pickup locations
-    pickup_agg = successful['Pickup_Location'].value_counts()
-    for loc, count in pickup_agg.items():
-        if loc in location_coords:
-            lat, lng = location_coords[loc]
-            map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count})
+    if map_filter in ["Both", "Pickup Only"]:
+        pickup_agg = successful['Pickup_Location'].value_counts()
+        for loc, count in pickup_agg.items():
+            if loc in location_coords:
+                lat, lng = location_coords[loc]
+                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count})
     
     # Add dropoff locations
-    dropoff_agg = successful['Drop_Location'].value_counts()
-    for loc, count in dropoff_agg.items():
-        if loc in location_coords:
-            lat, lng = location_coords[loc]
-            map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count})
+    if map_filter in ["Both", "Dropoff Only"]:
+        dropoff_agg = successful['Drop_Location'].value_counts()
+        for loc, count in dropoff_agg.items():
+            if loc in location_coords:
+                lat, lng = location_coords[loc]
+                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count})
     
     if map_data:
         map_df = pd.DataFrame(map_data)
-        st.map(map_df[['latitude', 'longitude']], use_container_width=True, zoom=11)
+        
+        # Create custom map with different colors using folium
+        import folium
+        from streamlit_folium import st_folium
+        
+        # Calculate center of map
+        center_lat = map_df['latitude'].mean()
+        center_lng = map_df['longitude'].mean()
+        
+        m = folium.Map(location=[center_lat, center_lng], zoom_start=11, tiles="OpenStreetMap")
+        
+        # Add markers with different colors
+        for idx, row in map_df.iterrows():
+            color = '#FF6B35' if row['type'] == 'Pickup' else '#004E89'  # Orange for pickup, Blue for dropoff
+            icon_text = '🔴' if row['type'] == 'Pickup' else '🔵'
+            
+            folium.CircleMarker(
+                location=[row['latitude'], row['longitude']],
+                radius=8,
+                popup=f"{row['type']}<br>Rides: {row['count']}",
+                color=color,
+                fill=True,
+                fillColor=color,
+                fillOpacity=0.7,
+                weight=2
+            ).add_to(m)
+        
+        st_folium(m, width=1400, height=500)
         st.success(f"✅ Geocoded {len(location_coords)} locations")
     else:
-        st.warning("Could not geocode locations")
+        st.info("No location data available for selected filter")
 else:
     st.warning("⚠️ Geocoding in progress. This may take a moment on first load.")
 
