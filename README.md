@@ -1,145 +1,82 @@
-# Ola Ride Analytics — End-to-End Data Analysis Project
+# 🚖 Ola Ride Analytics: End-to-End Data Portfolio
 
-A full-stack data analysis project on Ola ride bookings covering SQL querying, Python EDA, Power BI dashboarding, and an interactive Streamlit web app.
-
----
-
-https://ola-data-analytics-e9jsowul8qsu99z6odvwbj.streamlit.app/
+A comprehensive data engineering and analytics project simulating a real-world ride-sharing environment in Bangalore. This project covers the full pipeline: **Extraction (SQL)**, **Statistical Validation (Python)**, **Business Intelligence (Power BI)**, and **Interactive Deployment (Streamlit)**.
 
 ---
 
-## Project Overview
+## 📊 Project Overview
+The objective is to analyze ride-sharing performance metrics, identify factors affecting booking success, and perform statistical testing on ride distances during peak hours.
 
-This project analyses a synthetic Ola bookings dataset of **103,024 rides** from July 2024 across Bangalore. The goal is to uncover operational inefficiencies, revenue patterns, and customer behaviour using multiple analytical tools.
-
----
-
-## Dataset
-
-| Field | Detail |
-|---|---|
-| Source | Synthetic / practice dataset |
-| Period | July 2024 |
-| Records | 103,024 rows, 20 columns |
-| City | Bangalore |
-
-**Key columns:** `Booking_ID`, `Booking_Status`, `Customer_ID`, `Vehicle_Type`, `Pickup_Location`, `Drop_Location`, `Booking_Value`, `Payment_Method`, `Ride_Distance`, `Driver_Ratings`, `Customer_Rating`, `Canceled_Rides_by_Customer`, `Canceled_Rides_by_Driver`
+### Key Features:
+* **SQL Intelligence**: 10 complex business queries including top-performing vehicle types and cancellation reasons.
+* **Python Statistical Testing**: Conducted **T-tests** to analyze variance between peak and off-peak ride distances.
+* **Interactive Dashboard**: A real-time Streamlit app featuring custom CSS and geographic mapping of Bangalore hotspots.
+* **Power BI Visualization**: Multi-view dashboard focusing on Revenue, Performance, and Satisfaction.
 
 ---
 
-## Tools & Stack
+## 🛠️ Technical Stack & Core Logic
 
-| Tool | Purpose |
-|---|---|
-| **SQL (MySQL)** | Data extraction, view creation, aggregations |
-| **Python (Pandas, Seaborn, Matplotlib, SciPy)** | EDA, statistical testing, segmentation |
-| **Power BI** | Interactive business dashboard |
-| **Streamlit** | Web app deployment |
+### 1. Database Layer: SQL Operations 🗄️
+**File:** `Ola.sql`  
+* **Logic:** Transforms raw booking data into high-value business views.
+* **Operations:** Handles aggregations (Total Revenue) and conditional filtering (Cancellation Distribution).
 
----
+### 2. Statistical Layer: Python EDA 🐍
+**File:** `Ola_Python_Analysis_.ipynb` / `streamlit.py`
+* **Scientific Logic:** Performs an **Independent T-Test** using `scipy.stats`.
+* **Hypothesis:** Compares average ride distances during Peak (17:00–21:00) vs. Off-Peak hours to determine if shifts in distance are statistically significant.
 
-## Project Structure
-
-```
-ola-ride-analytics/
-│
-├── Bookings.csv                        # Raw dataset
-├── Ola.sql                             # SQL queries & views
-├── Ola_Python_Analysis_Improved.ipynb  # Python EDA notebook
-├── Ola_Data_Analyst.pbix               # Power BI dashboard
-├── app.py                              # Streamlit web app
-└── README.md
-```
+### 3. Application Layer: Streamlit Dashboard 🚀
+**File:** `streamlit.py`
+* **Geospatial Mapping**: Uses a custom coordinate lookup table for 50+ Bangalore neighborhoods to render interactive maps.
+* **State Management**: Implements `@st.cache_data` to optimize CSV loading and filter responsiveness.
+* **Custom UI**: Injects CSS for "Dark Mode" metric cards and professional layout.
 
 ---
 
-## Key Findings
+## 📂 Repository Structure
 
-1. **62% booking success rate** — 18% of rides are cancelled by drivers, the single largest source of failed bookings
-2. **Evening hours (17–21) drive peak demand** — surge pricing opportunity exists in these slots
-3. **Prime SUV and Prime Sedan** command the highest average booking value — premium fleet expansion could increase revenue
-4. **Cash dominates at 54%** with UPI at 40% — room to accelerate digital payment adoption
-5. **Driver ratings are uniformly high (>4.0)** across all vehicle types — rating system may need review
-6. **Ride distance is the strongest predictor of booking value** — distance-based dynamic pricing is viable
-7. **VIP customers (spend >₹3,000)** represent a small but high-value segment — loyalty programme opportunity
-
----
-
-## Statistical Analysis
-
-- **One-Way ANOVA** — Booking value differs significantly across vehicle types (p < 0.05)
-- **Welch's t-test** — Ride distance during peak hours (17–21) vs off-peak tested for significance
-- **Chi-Square Test** — Association between payment method and vehicle type
+| File | Description |
+| :--- | :--- |
+| `Bookings.csv` | Dataset containing 100,000+ ride records. |
+| `Ola.sql` | SQL scripts for business KPI extraction. |
+| `Ola_Python_Analysis_.ipynb` | Jupyter Notebook for data cleaning and EDA. |
+| `streamlit.py` | Python script for the interactive web-based dashboard. |
+| `Ola Data Analyst.pbix` | Power BI file for visual storytelling. |
+| `requirements.txt` | Environment dependencies. |
 
 ---
 
-## Machine Learning *(In Progress)*
+## ⚙️ Installation & Usage
 
-ML extensions planned after completing the **Google Advanced Data Analytics Certificate**:
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/ola-ride-analytics.git](https://github.com/your-username/ola-ride-analytics.git)
 
-| Model | Target | Goal |
-|---|---|---|
-| Logistic Regression | Booking success (binary) | Predict whether a ride will complete |
-| Random Forest / XGBoost | Cancellation risk | Identify high-risk bookings before they cancel |
-| Linear Regression | Booking value | Predict fare from distance, vehicle type, time |
-| K-Means Clustering | Customer segments | Data-driven RFM segmentation |
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
 
-> Models will be added to the existing notebook once training is complete.
-
----
-
-## Python Notebook Sections
-
-- Data Quality Check
-- Key Performance Indicators (KPIs)
-- Booking Status Distribution
-- Cancellation Deep Dive
-- Vehicle Type Performance
-- Payment Method Analysis
-- Time-Based Trends
-- Customer Segmentation (RFM-lite)
-- Ratings Analysis
-- Incomplete Rides Analysis
-- Statistical Analysis
-- Vehicle Type Scorecard
-- Key Insights Summary
+3. **Launch the Dashboard:**
+   ```bash
+   streamlit run streamlit.py
 
 ---
 
-## SQL Queries Covered
-
-- Successful bookings view
-- Average ride distance by vehicle type
-- Top 5 customers by ride count
-- Driver cancellations by reason
-- Max/min driver ratings for Prime Sedan
-- UPI payment rides
-- Total revenue from successful rides
-- Incomplete rides with reasons
+## 📈 Key Insights
+* **Revenue Drivers**: Prime Sedans consistently generate the highest revenue per ride.
+* **Operational Bottlenecks**: Driver cancellations are primarily driven by personal issues, while customer cancellations spike during evening peaks.
+* **Statistical Significance**: T-testing validates whether ride distances significantly differ during peak traffic hours, assisting in supply-side planning.
 
 ---
 
-## Streamlit App
-
-The web app provides an interactive dashboard with:
-- KPI metric cards (total bookings, revenue, success rate, avg ride value)
-- Sidebar filters by vehicle type, booking status, and payment method
-- Booking status breakdown
-- Revenue and ride volume by vehicle type
-- Hourly demand heatmap
-- Payment method distribution
-- Customer segmentation chart
-- Peak vs off-peak ride distance comparison
-
-**Run locally:**
-```bash
-pip install streamlit pandas matplotlib seaborn scipy
-streamlit run app.py
-```
+## 🛠️ Roadmap & Future Enhancements (WIP) 🚧
+This project is currently a **Work-In-Progress**. Future updates will include:
+* **Predictive Analytics**: Integration of Machine Learning models (Random Forest/XGBoost) to predict ride cancellations, following the completion of my ML certification.
+* **Dynamic Geocoding**: Real-time coordinate fetching for broader location support.
+* **Automated Data Pipeline**: Transitioning from static CSV to a live SQL database connection.
 
 ---
-
-## Author
-
-MBA Data Portfolio — Delhi, India
+**Developed by [Daksh Sharma]**|*Data Analytics & Business Intelligence Portfolio*
 
