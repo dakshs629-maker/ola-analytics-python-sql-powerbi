@@ -4,6 +4,10 @@ A full-stack data analysis project on Ola ride bookings covering SQL querying, P
 
 ---
 
+https://ola-data-analytics-e9jsowul8qsu99z6odvwbj.streamlit.app/
+
+---
+
 ## Project Overview
 
 This project analyses a synthetic Ola bookings dataset of **103,024 rides** from July 2024 across Bangalore. The goal is to uncover operational inefficiencies, revenue patterns, and customer behaviour using multiple analytical tools.
@@ -138,3 +142,4 @@ streamlit run app.py
 ## Author
 
 MBA Data Portfolio — Delhi, India
+
