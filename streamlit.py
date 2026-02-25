@@ -326,54 +326,78 @@ st.markdown('<p class="section-header">Pickup & Dropoff Locations Map</p>', unsa
 
 @st.cache_data
 def geocode_locations(locations):
-    """Geocode location names to coordinates using geopy"""
+    """Geocode location names to coordinates using geopy with error handling"""
     from geopy.geocoders import Nominatim
-    geocoder = Nominatim(user_agent="ola_analytics")
+    from geopy.exc import GeocoderTimedOut
+    import time
+    
+    geocoder = Nominatim(user_agent="ola_analytics", timeout=10)
     coords = {}
-    for loc in locations:
+    
+    for i, loc in enumerate(locations):
         try:
+            # Try with Bangalore context first
             location = geocoder.geocode(f"{loc}, Bangalore, India")
             if location:
                 coords[loc] = (location.latitude, location.longitude)
-        except:
+            else:
+                # If not found, try without context
+                location = geocoder.geocode(loc)
+                if location:
+                    coords[loc] = (location.latitude, location.longitude)
+            
+            # Add delay to respect rate limits
+            time.sleep(0.5)
+        except GeocoderTimedOut:
+            st.warning(f"⚠️ Timeout geocoding '{loc}'. Skipping...")
+        except Exception as e:
             pass
+    
     return coords
 
 # Get unique locations
-all_locations = list(set(successful['Pickup_Location'].unique()) | set(successful['Drop_Location'].unique()))
+pickup_locs = set(successful['Pickup_Location'].dropna().unique())
+dropoff_locs = set(successful['Drop_Location'].dropna().unique())
+all_locations = list(pickup_locs | dropoff_locs)
+
+st.info(f"Found {len(pickup_locs)} unique pickup locations and {len(dropoff_locs)} unique dropoff locations")
 
 # Geocode locations
 location_coords = geocode_locations(all_locations)
 
 if location_coords:
+    st.success(f"✅ Successfully geocoded {len(location_coords)}/{len(all_locations)} locations")
+    
     # Map filter options
-    col_map1, col_map2 = st.columns([3, 1])
-    with col_map2:
-        map_filter = st.radio("Show:", ["Both", "Pickup Only", "Dropoff Only"], horizontal=True)
+    map_filter = st.radio("Show:", ["Both", "Pickup Only", "Dropoff Only"], horizontal=True)
     
-    # Prepare map data
-    map_data = []
+    # Prepare map data based on filter
+    pickup_data = []
+    dropoff_data = []
     
-    # Add pickup locations
+    # Prepare pickup locations
     if map_filter in ["Both", "Pickup Only"]:
         pickup_agg = successful['Pickup_Location'].value_counts()
         for loc, count in pickup_agg.items():
             if loc in location_coords:
                 lat, lng = location_coords[loc]
-                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count})
+                pickup_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count, 'location': loc})
     
-    # Add dropoff locations
+    # Prepare dropoff locations
     if map_filter in ["Both", "Dropoff Only"]:
         dropoff_agg = successful['Drop_Location'].value_counts()
         for loc, count in dropoff_agg.items():
             if loc in location_coords:
                 lat, lng = location_coords[loc]
-                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count})
+                dropoff_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count, 'location': loc})
+    
+    # Combine data
+    map_data = pickup_data + dropoff_data
     
     if map_data:
         map_df = pd.DataFrame(map_data)
         
-        # Create custom map with different colors using folium
+        # Create custom map using folium
         import folium
         from streamlit_folium import st_folium
         
@@ -386,27 +410,28 @@ if location_coords:
         # Add markers with different colors
         for idx, row in map_df.iterrows():
             color = '#FF6B35' if row['type'] == 'Pickup' else '#004E89'  # Orange for pickup, Blue for dropoff
-            icon_text = '🔴' if row['type'] == 'Pickup' else '🔵'
             
             folium.CircleMarker(
                 location=[row['latitude'], row['longitude']],
-                radius=8,
-                popup=f"{row['type']}<br>Rides: {row['count']}",
+                radius=10,
+                popup=f"<b>{row['location']}</b><br>{row['type']}<br>Rides: {row['count']}",
+                tooltip=f"{row['location']} ({row['type']})",
                 color=color,
                 fill=True,
                 fillColor=color,
-                fillOpacity=0.7,
+                fillOpacity=0.8,
                 weight=2
             ).add_to(m)
         
         st_folium(m, width=1400, height=500)
-        st.success(f"✅ Geocoded {len(location_coords)} locations")
+        st.info(f"Showing {len(pickup_data)} pickup & {len(dropoff_data)} dropoff locations")
     else:
-        st.info("No location data available for selected filter")
+        st.warning("No location data available for selected filter")
 else:
-    st.warning("⚠️ Geocoding in progress. This may take a moment on first load.")
+    st.warning("⚠️ Could not geocode locations. Check your internet connection and try refreshing.")
 
 
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+
