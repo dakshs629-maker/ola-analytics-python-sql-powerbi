@@ -97,7 +97,7 @@ def load_data(path):
 
 
 # ---------- LOAD DATA ----------
-DATA_PATH = "Ola Bookings Dataset.csv"
+DATA_PATH = "Bookings.csv"
 
 if os.path.exists(DATA_PATH):
     df_raw = load_data(DATA_PATH)
