@@ -4,21 +4,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
-from scipy.stats import ttest_ind
-import os
 
-# ---------- 1. THEME & HELPERS ----------
+# Global dark chart theme
 CHART_BG  = '#0d1117'
 CHART_FG  = '#e2b96f'
 GRID_COL  = '#2a2a3f'
 
 sns.set_theme(style='darkgrid')
 plt.rcParams.update({
-    'text.color': CHART_FG, 'axes.labelcolor': CHART_FG,
-    'xtick.color': CHART_FG, 'ytick.color': CHART_FG,
-    'axes.titlecolor': CHART_FG, 'figure.facecolor': CHART_BG,
-    'axes.facecolor': CHART_BG, 'axes.edgecolor': CHART_FG,
-    'grid.color': GRID_COL, 'font.size': 10, 'savefig.facecolor': CHART_BG,
+    'text.color':        CHART_FG,
+    'axes.labelcolor':   CHART_FG,
+    'xtick.color':       CHART_FG,
+    'ytick.color':       CHART_FG,
+    'axes.titlecolor':   CHART_FG,
+    'figure.facecolor':  CHART_BG,
+    'axes.facecolor':    CHART_BG,
+    'axes.edgecolor':    CHART_FG,
+    'grid.color':        GRID_COL,
+    'font.size':         10,
+    'savefig.facecolor': CHART_BG,
 })
 
 def styled_fig(w=6, h=3.5):
@@ -26,55 +30,70 @@ def styled_fig(w=6, h=3.5):
     fig.patch.set_edgecolor(CHART_FG)
     fig.patch.set_linewidth(1.5)
     return fig, ax
+from scipy.stats import ttest_ind
+import os
 
+# ---------- PAGE CONFIG ----------
+st.set_page_config(
+    page_title="Ola Ride Analytics",
+    page_icon="🚖",
+    layout="wide"
+)
+
+st.markdown("""
+<style>
+.metric-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 1.4rem 1.2rem;
+    border-radius: 14px;
+    color: white;
+    text-align: center;
+    margin: 0.4rem 0;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
+}
+.metric-card h2 { margin: 0; font-size: 1.8rem; font-weight: 700; color: #e2b96f; }
+.metric-card p  { margin: 0.3rem 0 0; font-size: 0.85rem; color: #cbd5e0; letter-spacing: 0.03em; }
+.section-header {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #cbd5e0;
+    margin: 1.2rem 0 0.5rem;
+    border-left: 4px solid #e2b96f;
+    padding: 0.4rem 0.6rem;
+    background: #16213e;
+    border-radius: 0 6px 6px 0;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---------- HELPERS ----------
 def inr(num):
     try:
         num = int(round(float(num)))
         s = str(abs(num))
-        if len(s) <= 3: return f"₹{s}"
+        if len(s) <= 3:
+            return f"₹{s}"
         last3 = s[-3:]; rest = s[:-3]; parts = []
         while len(rest) > 2:
             parts.append(rest[-2:]); rest = rest[:-2]
         if rest: parts.append(rest)
         parts.reverse()
         return f"₹{','.join(parts)},{last3}"
-    except: return "₹0"
+    except:
+        return str(num)
 
 def indian_num(num):
-    try:
-        s = str(abs(int(num)))
-        if len(s) <= 3: return s
-        last3 = s[-3:]; rest = s[:-3]; parts = []
-        while len(rest) > 2:
-            parts.append(rest[-2:]); rest = rest[:-2]
-        if rest: parts.append(rest)
-        parts.reverse()
-        return ','.join(parts) + ',' + last3
-    except: return "0"
-
-def metric_card(value, label):
+    s = str(abs(int(num)))
+    if len(s) <= 3:
+        return s
+    last3 = s[-3:]; rest = s[:-3]; parts = []
+    while len(rest) > 2:
+        parts.append(rest[-2:]); rest = rest[:-2]
+    if rest: parts.append(rest)
+    parts.reverse()
+    return ','.join(parts) + ',' + last3
     return f'<div class="metric-card"><h2>{value}</h2><p>{label}</p></div>'
-
-# BANGALORE COORDINATES LOOKUP (For the 50 areas in your data)
-COORDS = {
-    'Tumkur Road': [13.0425, 77.4935], 'Magadi Road': [12.9754, 77.4851], 'Sahakar Nagar': [13.0624, 77.5907],
-    'HSR Layout': [12.9121, 77.6446], 'Rajajinagar': [12.9893, 77.5533], 'Kadugodi': [12.9984, 77.7609],
-    'Bannerghatta Road': [12.8907, 77.5954], 'Chamarajpet': [12.9605, 77.5658], 'RT Nagar': [13.0247, 77.5948],
-    'Hosur Road': [12.9118, 77.6322], 'Kammanahalli': [13.0159, 77.6373], 'Cox Town': [12.9972, 77.6186],
-    'Indiranagar': [12.9784, 77.6408], 'Ramamurthy Nagar': [13.0120, 77.6777], 'Electronic City': [12.8452, 77.6632],
-    'Koramangala': [12.9352, 77.6245], 'Basavanagudi': [12.9406, 77.5738], 'Padmanabhanagar': [12.9184, 77.5583],
-    'Mysore Road': [12.9554, 77.5273], 'Yelahanka': [13.1007, 77.5963], 'Frazer Town': [12.9968, 77.6111],
-    'Jayanagar': [12.9308, 77.5830], 'Majestic': [12.9767, 77.5713], 'Yeshwanthpur': [13.0235, 77.5550],
-    'Peenya': [13.0329, 77.5273], 'Marathahalli': [12.9569, 77.7011], 'KR Puram': [13.0117, 77.7033],
-    'Hulimavu': [12.8790, 77.6033], 'Shivajinagar': [12.9857, 77.5977], 'Hennur': [13.0258, 77.6311],
-    'Devanahalli': [13.2484, 77.7126], 'Rajarajeshwari Nagar': [12.9126, 77.5222], 'Ulsoor': [12.9817, 77.6286],
-    'Shantinagar': [12.9575, 77.5983], 'JP Nagar': [12.9063, 77.5857], 'Chickpet': [12.9700, 77.5780],
-    'Langford Town': [12.9575, 77.6074], 'BTM Layout': [12.9165, 77.6101], 'Sarjapur Road': [12.9184, 77.6705],
-    'Bellandur': [12.9304, 77.6784], 'Richmond Town': [12.9667, 77.6000], 'Kengeri': [12.9176, 77.4837],
-    'Banashankari': [12.9254, 77.5468], 'Vijayanagar': [12.9640, 77.5350], 'Malleshwaram': [12.9984, 77.5719],
-    'Whitefield': [12.9698, 77.7500], 'MG Road': [12.9733, 77.6033], 'Hebbal': [13.0358, 77.5970],
-    'Nagarbhavi': [12.9719, 77.5128], 'Varthur': [12.9406, 77.7469]
-}
 
 @st.cache_data
 def load_data(path):
@@ -83,100 +102,221 @@ def load_data(path):
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
     df['Hour'] = df['Date'].dt.hour
     df['Day_of_Week'] = df['Date'].dt.day_name()
-    df['Booking_Value'] = pd.to_numeric(df['Booking_Value'], errors='coerce').fillna(0)
-    df['Ride_Distance'] = pd.to_numeric(df['Ride_Distance'], errors='coerce').fillna(0)
-    
-    # Map coordinates for the map visual
-    df['lat'] = df['Pickup_Location'].map(lambda x: COORDS.get(x, [None, None])[0])
-    df['lon'] = df['Pickup_Location'].map(lambda x: COORDS.get(x, [None, None])[1])
+    df['Booking_Value'] = pd.to_numeric(df['Booking_Value'], errors='coerce')
+    df['Ride_Distance'] = pd.to_numeric(df['Ride_Distance'], errors='coerce')
     return df
 
-# ---------- 2. PAGE CONFIG & CSS ----------
-st.set_page_config(page_title="Ola Ride Analytics", page_icon="🚖", layout="wide")
 
-st.markdown("""
-<style>
-    .metric-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-        padding: 1.2rem; border-radius: 12px; color: white; text-align: center;
-        box-shadow: 2px 4px 10px rgba(0,0,0,0.3); border: 1px solid #2a2a3f; margin-bottom: 10px;
-    }
-    .metric-card h2 { margin: 0; font-size: 1.8rem; color: #e2b96f; }
-    .metric-card p { margin: 0; font-size: 0.85rem; color: #cbd5e0; }
-    .section-header {
-        font-size: 1rem; font-weight: 600; color: #cbd5e0; margin: 1.2rem 0 0.5rem;
-        border-left: 4px solid #e2b96f; padding: 0.4rem 0.6rem; background: #16213e;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- 3. DATA LOADING ----------
+# ---------- LOAD DATA ----------
 DATA_PATH = "Bookings.csv"
+
 if os.path.exists(DATA_PATH):
     df_raw = load_data(DATA_PATH)
+    st.sidebar.info("Using bundled dataset")
 else:
-    st.error("Bookings.csv not found!")
+    st.error("Dataset not found. Please ensure the CSV is in the repository.")
     st.stop()
 
-# Sidebar
-v_type = st.sidebar.multiselect("Vehicle Type", sorted(df_raw['Vehicle_Type'].unique()), default=sorted(df_raw['Vehicle_Type'].unique()))
-df = df_raw[df_raw['Vehicle_Type'].isin(v_type)].copy()
+
+# ---------- SIDEBAR FILTERS ----------
+st.sidebar.header("Data")
+st.sidebar.file_uploader("Upload Bookings CSV", type="csv", disabled=True)
+st.sidebar.markdown("---")
+st.sidebar.header("Filters")
+
+vehicle_options = sorted(df_raw['Vehicle_Type'].dropna().unique())
+selected_vehicles = st.sidebar.multiselect("Vehicle Type", vehicle_options, default=vehicle_options)
+
+status_options = sorted(df_raw['Booking_Status'].dropna().unique())
+selected_status = st.sidebar.multiselect("Booking Status", status_options, default=status_options)
+
+payment_options = sorted(df_raw['Payment_Method'].dropna().unique())
+selected_payments = st.sidebar.multiselect("Payment Method", payment_options, default=payment_options)
+
+df = df_raw[
+    df_raw['Vehicle_Type'].isin(selected_vehicles) &
+    df_raw['Booking_Status'].isin(selected_status)
+].copy()
+
 successful = df[df['Booking_Status'] == 'Success'].copy()
+successful_pay = successful[successful['Payment_Method'].isin(selected_payments)]
 
-# ---------- 4. DASHBOARD ----------
-st.title("Ola Ride Analytics 🚖")
 
-# KPI ROW
+# ---------- TITLE ----------
+st.title("Ola Ride Analytics")
+st.markdown("Interactive Analytics Dashboard")
+st.markdown("---")
+
+
+# ---------- KPI CARDS ----------
+total_bookings   = len(df)
+success_rate     = len(successful) / total_bookings * 100 if total_bookings else 0
+total_revenue    = successful['Booking_Value'].sum()
+avg_ride_value   = successful['Booking_Value'].mean()
+
 c1, c2, c3, c4 = st.columns(4)
-c1.markdown(metric_card(indian_num(len(df)), "Total Bookings"), unsafe_allow_html=True)
-c2.markdown(metric_card(f"{(len(successful)/len(df)*100):.1f}%" if len(df)>0 else "0%", "Success Rate"), unsafe_allow_html=True)
-c3.markdown(metric_card(inr(successful['Booking_Value'].sum()), "Total Revenue"), unsafe_allow_html=True)
-c4.markdown(metric_card(inr(successful['Booking_Value'].mean()) if len(successful)>0 else "₹0", "Avg Ride Value"), unsafe_allow_html=True)
+c1.markdown(metric_card(indian_num(total_bookings), "Total Bookings"), unsafe_allow_html=True)
+c2.markdown(metric_card(f"{success_rate:.1f}%", "Booking Success Rate"), unsafe_allow_html=True)
+c3.markdown(metric_card(inr(total_revenue), "Total Revenue"), unsafe_allow_html=True)
+c4.markdown(metric_card(inr(avg_ride_value), "Avg Ride Value"), unsafe_allow_html=True)
 
-# ROW 1: STATUS & REVENUE
+st.markdown("---")
+
+
+# ---------- ROW 1: Booking Status + Vehicle Revenue ----------
 col1, col2 = st.columns(2)
+
 with col1:
     st.markdown('<p class="section-header">Booking Status Breakdown</p>', unsafe_allow_html=True)
-    counts = df['Booking_Status'].value_counts()
-    fig, ax = styled_fig()
-    sns.barplot(x=counts.values, y=counts.index, palette='viridis', ax=ax)
+    status_counts = df['Booking_Status'].value_counts()
+    colors = ['#2ecc71' if s == 'Success' else '#e74c3c' if 'Driver' in s else '#e67e22' if 'Customer' in s else '#95a5a6'
+              for s in status_counts.index]
+    fig, ax = styled_fig(6, 3.5)
+    bars = ax.barh(status_counts.index, status_counts.values, color=colors, edgecolor='none')
+    for bar, val in zip(bars, status_counts.values):
+        ax.text(val + 200, bar.get_y() + bar.get_height()/2, f'{val:,}', va='center', fontsize=9)
+    ax.set_xlabel('Rides', fontsize=9)
+    ax.tick_params(labelsize=9)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
     st.pyplot(fig)
     plt.close()
 
 with col2:
-    st.markdown('<p class="section-header">Revenue by Vehicle</p>', unsafe_allow_html=True)
-    rev = successful.groupby('Vehicle_Type')['Booking_Value'].sum().sort_values()
-    fig, ax = styled_fig()
-    rev.plot(kind='barh', ax=ax, color='#e2b96f')
-    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'₹{x/1e5:.1f}L'))
+    st.markdown('<p class="section-header">Revenue by Vehicle Type</p>', unsafe_allow_html=True)
+    rev_by_vehicle = successful.groupby('Vehicle_Type')['Booking_Value'].sum().sort_values(ascending=True)
+    fig, ax = styled_fig(6, 3.5)
+    bars = ax.barh(rev_by_vehicle.index, rev_by_vehicle.values,
+                   color=sns.color_palette('Blues_d', len(rev_by_vehicle)), edgecolor='none')
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'₹{x/1e6:.1f}M'))
+    ax.tick_params(labelsize=9)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
     st.pyplot(fig)
     plt.close()
 
-# NEW ROW: GEOGRAPHIC MAP
-st.markdown('<p class="section-header">Ride Hotspots (Pickup Locations)</p>', unsafe_allow_html=True)
-map_df = df.dropna(subset=['lat', 'lon'])
-if not map_df.empty:
-    st.map(map_df[['lat', 'lon']], color='#e2b96f', size=20)
-else:
-    st.warning("Coordinate mapping failed for the locations.")
 
-# ROW: STATISTICAL BOXPLOT (FIXED)
-st.markdown('<p class="section-header">Peak vs Off-Peak Distance Analysis</p>', unsafe_allow_html=True)
-df['Period'] = df['Hour'].apply(lambda h: 'Peak (17-21)' if 17 <= h <= 21 else 'Off-Peak')
-col_s, col_p = st.columns([1, 2])
+# ---------- ROW 2: Hourly Heatmap ----------
+st.markdown('<p class="section-header">Booking Demand: Hour of Day × Day of Week</p>', unsafe_allow_html=True)
+day_order = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+pivot = df.groupby(['Day_of_Week','Hour'])['Booking_ID'].count().unstack().reindex(day_order)
+fig, ax = styled_fig(14, 3.5)
+sns.heatmap(pivot, cmap='YlOrRd', linewidths=0.2, annot=False, ax=ax, cbar_kws={'shrink': 0.6})
+ax.set_xlabel('Hour of Day', fontsize=9)
+ax.set_ylabel('')
+ax.tick_params(labelsize=8)
+plt.tight_layout()
+st.pyplot(fig)
+plt.close()
 
-with col_s:
-    p_data = df[df['Period'] == 'Peak (17-21)']['Ride_Distance'].dropna()
-    o_data = df[df['Period'] == 'Off-Peak']['Ride_Distance'].dropna()
-    if len(p_data) > 1 and len(o_data) > 1:
-        t, p_val = ttest_ind(p_data, o_data, equal_var=False)
-        st.info(f"P-Value: {p_val:.4f}\n\nConclusion: {'Significant' if p_val < 0.05 else 'Not Significant'}")
 
-with col_p:
-    fig, ax = styled_fig(8, 4)
-    sns.boxplot(data=df, x='Period', y='Ride_Distance', ax=ax, order=['Off-Peak', 'Peak (17-21)'], palette=['#3498db', '#e74c3c'])
+# ---------- ROW 3: Payment Method + Customer Segmentation ----------
+col3, col4 = st.columns(2)
+
+with col3:
+    st.markdown('<p class="section-header">Payment Method Distribution</p>', unsafe_allow_html=True)
+    pay_counts = successful_pay['Payment_Method'].value_counts()
+    fig, ax = styled_fig(6, 3.5)
+    bars = ax.bar(pay_counts.index, pay_counts.values,
+                  color=sns.color_palette('Set2', len(pay_counts)), edgecolor='none')
+    for bar, val in zip(bars, pay_counts.values):
+        ax.text(bar.get_x() + bar.get_width()/2, val + 100, f'{val:,}', ha='center', fontsize=9)
+    ax.set_ylabel('Rides', fontsize=9)
+    ax.tick_params(labelsize=9)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
     st.pyplot(fig)
     plt.close()
 
+with col4:
+    st.markdown('<p class="section-header">Customer Segmentation by Total Spend</p>', unsafe_allow_html=True)
+    customer = successful.groupby('Customer_ID').agg(Total_Spend=('Booking_Value','sum')).reset_index()
+    def segment(s):
+        if s > 3000: return 'VIP (>₹3k)'
+        elif s > 1000: return 'Regular (₹1k–3k)'
+        else: return 'Occasional (<₹1k)'
+    customer['Segment'] = customer['Total_Spend'].apply(segment)
+    seg_counts = customer['Segment'].value_counts()
+    colors_seg = {'VIP (>₹3k)': '#e2b96f', 'Regular (₹1k–3k)': '#0f3460', 'Occasional (<₹1k)': '#95a5a6'}
+    fig, ax = styled_fig(6, 3.5)
+    ax.bar(seg_counts.index, seg_counts.values,
+           color=[colors_seg.get(s, '#ccc') for s in seg_counts.index], edgecolor='none')
+    for i, (idx, val) in enumerate(seg_counts.items()):
+        ax.text(i, val + 20, f'{val:,}', ha='center', fontsize=9)
+    ax.set_ylabel('Customers', fontsize=9)
+    ax.tick_params(labelsize=9)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+
+
+# ---------- ROW 4: Peak vs Off-Peak t-test ----------
+st.markdown('<p class="section-header">Ride Distance: Peak (17–21) vs Off-Peak — Welch\'s t-Test</p>', unsafe_allow_html=True)
+
+peak     = successful[successful['Hour'].between(17, 21)]['Ride_Distance'].dropna()
+off_peak = successful[~successful['Hour'].between(17, 21)]['Ride_Distance'].dropna()
+t_stat, p_val = ttest_ind(peak, off_peak, equal_var=False)
+
+col5, col6 = st.columns([1, 1.6])
+
+with col5:
+    st.markdown(f"""
+    <div style='background:#1a1a2e; padding:1.2rem; border-radius:10px; font-size:0.9rem; line-height:2; border: 1px solid #e2b96f; color:#e2b96f;'>
+    <b>Peak mean</b>: {peak.mean():.2f} km &nbsp; (n={len(peak):,})<br>
+    <b>Off-peak mean</b>: {off_peak.mean():.2f} km &nbsp; (n={len(off_peak):,})<br>
+    <b>T-statistic</b>: {t_stat:.4f}<br>
+    <b>P-value</b>: {p_val:.6f}<br>
+    <b>Conclusion</b>: {"✅ Significant difference (p < 0.05)" if p_val < 0.05 else "❌ No significant difference (p ≥ 0.05)"}
+    </div>
+    """, unsafe_allow_html=True)
+
+with col6:
+    plot_df = successful.copy()
+    plot_df['Period'] = plot_df['Hour'].apply(lambda h: 'Peak (17–21)' if 17 <= h <= 21 else 'Off-Peak')
+    fig, ax = styled_fig(7, 3.5)
+    sns.boxplot(x='Period', y='Ride_Distance', data=plot_df, ax=ax,
+                order=['Off-Peak', 'Peak (17–21)'],
+                hue='Period', palette={'Peak (17–21)': '#e74c3c', 'Off-Peak': '#3498db'},
+                width=0.45, flierprops=dict(marker='o', markersize=2, alpha=0.3),
+                legend=False)
+    ax.set_ylabel('Ride Distance (km)', fontsize=9)
+    ax.set_xlabel('')
+    ax.annotate(f'p = {p_val:.4f}', xy=(0.5, 0.95), xycoords='axes fraction',
+                ha='center', fontsize=9, color='green' if p_val < 0.05 else 'red', fontstyle='italic')
+    ax.spines[['top','right']].set_visible(False)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+
+
+# ---------- ROW 5: Vehicle Scorecard ----------
+st.markdown('<p class="section-header">Vehicle Type Performance Scorecard</p>', unsafe_allow_html=True)
+
+scorecard = successful.groupby('Vehicle_Type').agg(
+    Total_Revenue=('Booking_Value', 'sum'),
+    Avg_Value=('Booking_Value', 'mean'),
+    Avg_Distance=('Ride_Distance', 'mean'),
+    Avg_Driver_Rating=('Driver_Ratings', 'mean'),
+    Ride_Count=('Booking_ID', 'count')
+).round(2).reset_index()
+scorecard['Total_Revenue_Display'] = scorecard['Total_Revenue'].apply(inr)
+
+st.dataframe(
+    scorecard[['Vehicle_Type','Ride_Count','Total_Revenue_Display','Avg_Value','Avg_Distance','Avg_Driver_Rating']]
+    .rename(columns={
+        'Vehicle_Type': 'Vehicle',
+        'Ride_Count': 'Rides',
+        'Total_Revenue_Display': 'Total Revenue',
+        'Avg_Value': 'Avg Value (₹)',
+        'Avg_Distance': 'Avg Distance (km)',
+        'Avg_Driver_Rating': 'Avg Driver Rating'
+    }),
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# ---------- FOOTER ----------
 st.markdown("---")
-st.markdown("<p style='text-align:center; color:gray;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
