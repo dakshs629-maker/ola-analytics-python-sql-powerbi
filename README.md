@@ -78,5 +78,6 @@ This project is currently a **Work-In-Progress**. Future updates will include:
 * **Automated Data Pipeline**: Transitioning from static CSV to a live SQL database connection.
 
 ---
-**Developed by [Daksh Sharma]**|*Data Analytics & Business Intelligence Portfolio*
+**Developed by Daksh Sharma** | *Data Analytics & Business Intelligence Portfolio*
+
 
