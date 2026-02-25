@@ -93,6 +93,8 @@ def indian_num(num):
     if rest: parts.append(rest)
     parts.reverse()
     return ','.join(parts) + ',' + last3
+
+def metric_card(value, label):
     return f'<div class="metric-card"><h2>{value}</h2><p>{label}</p></div>'
 
 @st.cache_data
@@ -320,3 +322,4 @@ st.dataframe(
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+
