@@ -403,12 +403,29 @@ if location_coords:
         
         m = folium.Map(location=[center_lat, center_lng], zoom_start=11, tiles="OpenStreetMap")
         
+        # Group by location to detect duplicates
+        location_groups = map_df.groupby(['latitude', 'longitude'])
+        
         # Add markers with different colors
         for idx, row in map_df.iterrows():
             color = '#FF6B35' if row['type'] == 'Pickup' else '#004E89'  # Orange for pickup, Blue for dropoff
             
+            # Get count of markers at this exact location
+            same_loc = location_groups.get_group((row['latitude'], row['longitude']))
+            same_loc_count = len(same_loc)
+            
+            # If multiple markers at same location, offset them slightly
+            lat_offset = 0
+            lng_offset = 0
+            if same_loc_count > 1:
+                # Offset based on marker type
+                if row['type'] == 'Pickup':
+                    lat_offset = 0.002  # Small offset north
+                else:
+                    lat_offset = -0.002  # Small offset south
+            
             folium.CircleMarker(
-                location=[row['latitude'], row['longitude']],
+                location=[row['latitude'] + lat_offset, row['longitude'] + lng_offset],
                 radius=10,
                 popup=f"<b>{row['location']}</b><br>{row['type']}<br>Rides: {row['count']}",
                 tooltip=f"{row['location']} ({row['type']})",
