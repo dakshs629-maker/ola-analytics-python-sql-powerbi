@@ -56,7 +56,7 @@ st.markdown("""
 .section-header {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #2d3748;
+    color: #e2b96f;
     margin: 1.2rem 0 0.5rem;
     border-left: 4px solid #0f3460;
     padding-left: 0.6rem;
@@ -101,6 +101,7 @@ DATA_PATH = "Bookings.csv"
 
 if os.path.exists(DATA_PATH):
     df_raw = load_data(DATA_PATH)
+    st.sidebar.info("Using bundled dataset")
 else:
     st.error("Dataset not found. Please ensure the CSV is in the repository.")
     st.stop()
@@ -250,7 +251,7 @@ col5, col6 = st.columns([1, 1.6])
 
 with col5:
     st.markdown(f"""
-    <div style='background:#f7fafc; padding:1.2rem; border-radius:10px; font-size:0.9rem; line-height:2;'>
+    <div style='background:#1a1a2e; padding:1.2rem; border-radius:10px; font-size:0.9rem; line-height:2; border: 1px solid #e2b96f; color:#e2b96f;'>
     <b>Peak mean</b>: {peak.mean():.2f} km &nbsp; (n={len(peak):,})<br>
     <b>Off-peak mean</b>: {off_peak.mean():.2f} km &nbsp; (n={len(off_peak):,})<br>
     <b>T-statistic</b>: {t_stat:.4f}<br>
