@@ -372,8 +372,7 @@ if location_coords:
     map_filter = st.radio("Show:", ["Both", "Pickup Only", "Dropoff Only"], horizontal=True)
     
     # Prepare map data based on filter
-    pickup_data = []
-    dropoff_data = []
+    map_data = []
     
     # Prepare pickup locations
     if map_filter in ["Both", "Pickup Only"]:
@@ -381,18 +380,15 @@ if location_coords:
         for loc, count in pickup_agg.items():
             if loc in location_coords:
                 lat, lng = location_coords[loc]
-                pickup_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count, 'location': loc})
+                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Pickup', 'count': count, 'location': loc})
     
-    # Prepare dropoff locations
+    # Prepare dropoff locations (always add, don't filter by whether pickup exists)
     if map_filter in ["Both", "Dropoff Only"]:
         dropoff_agg = successful['Drop_Location'].value_counts()
         for loc, count in dropoff_agg.items():
             if loc in location_coords:
                 lat, lng = location_coords[loc]
-                dropoff_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count, 'location': loc})
-    
-    # Combine data
-    map_data = pickup_data + dropoff_data
+                map_data.append({'latitude': lat, 'longitude': lng, 'type': 'Dropoff', 'count': count, 'location': loc})
     
     if map_data:
         map_df = pd.DataFrame(map_data)
@@ -424,7 +420,10 @@ if location_coords:
             ).add_to(m)
         
         st_folium(m, width=1400, height=500)
-        st.info(f"Showing {len(pickup_data)} pickup & {len(dropoff_data)} dropoff locations")
+        
+        pickup_count = len([x for x in map_data if x['type'] == 'Pickup'])
+        dropoff_count = len([x for x in map_data if x['type'] == 'Dropoff'])
+        st.info(f"Showing {pickup_count} pickup locations (🟠) & {dropoff_count} dropoff locations (🔵)")
     else:
         st.warning("No location data available for selected filter")
 else:
@@ -434,4 +433,3 @@ else:
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
-
