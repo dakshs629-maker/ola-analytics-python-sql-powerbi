@@ -276,19 +276,20 @@ with col5:
 with col6:
     plot_df = successful.copy()
     plot_df['Period'] = plot_df['Hour'].apply(lambda h: 'Peak (17–21)' if 17 <= h <= 21 else 'Off-Peak')
-    fig, ax = styled_fig(7, 3.5)
+    fig, ax = styled_fig(6, 4)
     sns.boxplot(x='Period', y='Ride_Distance', data=plot_df, ax=ax,
                 order=['Off-Peak', 'Peak (17–21)'],
-                hue='Period', palette={'Peak (17–21)': '#e74c3c', 'Off-Peak': '#3498db'},
-                width=0.45, flierprops=dict(marker='o', markersize=2, alpha=0.3),
-                legend=False)
-    ax.set_ylabel('Ride Distance (km)', fontsize=9)
+                palette=['#3498db', '#e74c3c'],
+                width=0.5, flierprops=dict(marker='o', markersize=3, alpha=0.4))
+    ax.set_ylabel('Ride Distance (km)', fontsize=10)
     ax.set_xlabel('')
-    ax.annotate(f'p = {p_val:.4f}', xy=(0.5, 0.95), xycoords='axes fraction',
-                ha='center', fontsize=9, color='green' if p_val < 0.05 else 'red', fontstyle='italic')
+    ax.tick_params(labelsize=9)
+    ax.annotate(f'p = {p_val:.4f}', xy=(0.5, 0.98), xycoords='axes fraction',
+                ha='center', fontsize=10, weight='bold',
+                color='green' if p_val < 0.05 else 'red')
     ax.spines[['top','right']].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=True)
     plt.close()
 
 
@@ -322,4 +323,5 @@ st.dataframe(
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+
 
