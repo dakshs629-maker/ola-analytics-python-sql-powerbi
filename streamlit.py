@@ -4,6 +4,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
+
+# Global dark chart theme
+CHART_BG  = '#0d1117'
+CHART_FG  = '#e2b96f'
+GRID_COL  = '#2a2a3f'
+
+sns.set_theme(style='darkgrid')
+plt.rcParams.update({
+    'text.color':        CHART_FG,
+    'axes.labelcolor':   CHART_FG,
+    'xtick.color':       CHART_FG,
+    'ytick.color':       CHART_FG,
+    'axes.titlecolor':   CHART_FG,
+    'figure.facecolor':  CHART_BG,
+    'axes.facecolor':    CHART_BG,
+    'axes.edgecolor':    CHART_FG,
+    'grid.color':        GRID_COL,
+    'font.size':         10,
+    'savefig.facecolor': CHART_BG,
+})
+
+def styled_fig(w=6, h=3.5):
+    fig, ax = plt.subplots(figsize=(w, h))
+    fig.patch.set_edgecolor(CHART_FG)
+    fig.patch.set_linewidth(1.5)
+    return fig, ax
 from scipy.stats import ttest_ind
 import os
 
@@ -71,29 +97,18 @@ def load_data(path):
 
 
 # ---------- LOAD DATA ----------
-DATA_PATH = "Bookings.csv"
+DATA_PATH = "Ola Bookings Dataset.csv"
 
-st.sidebar.header("Data")
-uploaded = st.sidebar.file_uploader("Upload Bookings CSV", type="csv")
-
-if uploaded:
-    df_raw = pd.read_csv(uploaded)
-    df_raw.drop(columns=['Vehicle Images', 'Unnamed: 20'], inplace=True, errors='ignore')
-    df_raw['Date'] = pd.to_datetime(df_raw['Date'], errors='coerce')
-    df_raw['Hour'] = df_raw['Date'].dt.hour
-    df_raw['Day_of_Week'] = df_raw['Date'].dt.day_name()
-    df_raw['Booking_Value'] = pd.to_numeric(df_raw['Booking_Value'], errors='coerce')
-    df_raw['Ride_Distance'] = pd.to_numeric(df_raw['Ride_Distance'], errors='coerce')
-    st.sidebar.success("Custom file loaded")
-elif os.path.exists(DATA_PATH):
+if os.path.exists(DATA_PATH):
     df_raw = load_data(DATA_PATH)
-    st.sidebar.info("Using bundled dataset")
 else:
-    st.warning("Please upload Bookings.csv to get started.")
+    st.error("Dataset not found. Please ensure the CSV is in the repository.")
     st.stop()
 
 
 # ---------- SIDEBAR FILTERS ----------
+st.sidebar.header("Data")
+st.sidebar.file_uploader("Upload Bookings CSV", type="csv", disabled=True)
 st.sidebar.markdown("---")
 st.sidebar.header("Filters")
 
@@ -117,6 +132,7 @@ successful_pay = successful[successful['Payment_Method'].isin(selected_payments)
 
 # ---------- TITLE ----------
 st.title("Ola Ride Analytics")
+st.markdown("Interactive Analytics Dashboard")
 st.markdown("---")
 
 
@@ -143,7 +159,7 @@ with col1:
     status_counts = df['Booking_Status'].value_counts()
     colors = ['#2ecc71' if s == 'Success' else '#e74c3c' if 'Driver' in s else '#e67e22' if 'Customer' in s else '#95a5a6'
               for s in status_counts.index]
-    fig, ax = plt.subplots(figsize=(6, 3.5))
+    fig, ax = styled_fig(6, 3.5)
     bars = ax.barh(status_counts.index, status_counts.values, color=colors, edgecolor='none')
     for bar, val in zip(bars, status_counts.values):
         ax.text(val + 200, bar.get_y() + bar.get_height()/2, f'{val:,}', va='center', fontsize=9)
@@ -157,7 +173,7 @@ with col1:
 with col2:
     st.markdown('<p class="section-header">Revenue by Vehicle Type</p>', unsafe_allow_html=True)
     rev_by_vehicle = successful.groupby('Vehicle_Type')['Booking_Value'].sum().sort_values(ascending=True)
-    fig, ax = plt.subplots(figsize=(6, 3.5))
+    fig, ax = styled_fig(6, 3.5)
     bars = ax.barh(rev_by_vehicle.index, rev_by_vehicle.values,
                    color=sns.color_palette('Blues_d', len(rev_by_vehicle)), edgecolor='none')
     ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'₹{x/1e6:.1f}M'))
@@ -172,7 +188,7 @@ with col2:
 st.markdown('<p class="section-header">Booking Demand: Hour of Day × Day of Week</p>', unsafe_allow_html=True)
 day_order = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 pivot = df.groupby(['Day_of_Week','Hour'])['Booking_ID'].count().unstack().reindex(day_order)
-fig, ax = plt.subplots(figsize=(14, 3.5))
+fig, ax = styled_fig(14, 3.5)
 sns.heatmap(pivot, cmap='YlOrRd', linewidths=0.2, annot=False, ax=ax, cbar_kws={'shrink': 0.6})
 ax.set_xlabel('Hour of Day', fontsize=9)
 ax.set_ylabel('')
@@ -188,7 +204,7 @@ col3, col4 = st.columns(2)
 with col3:
     st.markdown('<p class="section-header">Payment Method Distribution</p>', unsafe_allow_html=True)
     pay_counts = successful_pay['Payment_Method'].value_counts()
-    fig, ax = plt.subplots(figsize=(6, 3.5))
+    fig, ax = styled_fig(6, 3.5)
     bars = ax.bar(pay_counts.index, pay_counts.values,
                   color=sns.color_palette('Set2', len(pay_counts)), edgecolor='none')
     for bar, val in zip(bars, pay_counts.values):
@@ -210,7 +226,7 @@ with col4:
     customer['Segment'] = customer['Total_Spend'].apply(segment)
     seg_counts = customer['Segment'].value_counts()
     colors_seg = {'VIP (>₹3k)': '#e2b96f', 'Regular (₹1k–3k)': '#0f3460', 'Occasional (<₹1k)': '#95a5a6'}
-    fig, ax = plt.subplots(figsize=(6, 3.5))
+    fig, ax = styled_fig(6, 3.5)
     ax.bar(seg_counts.index, seg_counts.values,
            color=[colors_seg.get(s, '#ccc') for s in seg_counts.index], edgecolor='none')
     for i, (idx, val) in enumerate(seg_counts.items()):
@@ -246,7 +262,7 @@ with col5:
 with col6:
     plot_df = successful.copy()
     plot_df['Period'] = plot_df['Hour'].apply(lambda h: 'Peak (17–21)' if 17 <= h <= 21 else 'Off-Peak')
-    fig, ax = plt.subplots(figsize=(7, 3.5))
+    fig, ax = styled_fig(7, 3.5)
     sns.boxplot(x='Period', y='Ride_Distance', data=plot_df, ax=ax,
                 palette={'Peak (17–21)': '#e74c3c', 'Off-Peak': '#3498db'},
                 width=0.45, flierprops=dict(marker='o', markersize=2, alpha=0.3))
