@@ -282,8 +282,9 @@ with col6:
                 palette=['#3498db', '#e74c3c'],
                 width=0.5, flierprops=dict(marker='o', markersize=3, alpha=0.4))
     ax.set_ylabel('Ride Distance (km)', fontsize=10)
-    ax.set_xlabel('')
+    ax.set_xlabel('Period', fontsize=10)
     ax.tick_params(labelsize=9)
+    ax.set_xticklabels(['Off-Peak', 'Peak (17–21)'], fontsize=9)
     ax.annotate(f'p = {p_val:.4f}', xy=(0.5, 0.98), xycoords='axes fraction',
                 ha='center', fontsize=10, weight='bold',
                 color='green' if p_val < 0.05 else 'red')
@@ -320,8 +321,60 @@ st.dataframe(
 )
 
 
+# ---------- ROW 6: Pickup and Dropoff Locations ----------
+st.markdown('<p class="section-header">Pickup & Dropoff Locations</p>', unsafe_allow_html=True)
+
+loc_col1, loc_col2 = st.columns(2)
+
+with loc_col1:
+    st.markdown('<p class="section-header">Top 15 Pickup Locations</p>', unsafe_allow_html=True)
+    pickup_counts = successful['Pickup_Location'].value_counts().head(15).sort_values(ascending=True)
+    fig, ax = styled_fig(6, 4)
+    bars = ax.barh(pickup_counts.index, pickup_counts.values, color='#3498db', edgecolor='none')
+    for bar, val in zip(bars, pickup_counts.values):
+        ax.text(val + 30, bar.get_y() + bar.get_height()/2, f'{val:,}', va='center', fontsize=9)
+    ax.set_xlabel('Rides', fontsize=9)
+    ax.tick_params(labelsize=8)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+
+with loc_col2:
+    st.markdown('<p class="section-header">Top 15 Dropoff Locations</p>', unsafe_allow_html=True)
+    dropoff_counts = successful['Drop_Location'].value_counts().head(15).sort_values(ascending=True)
+    fig, ax = styled_fig(6, 4)
+    bars = ax.barh(dropoff_counts.index, dropoff_counts.values, color='#e74c3c', edgecolor='none')
+    for bar, val in zip(bars, dropoff_counts.values):
+        ax.text(val + 30, bar.get_y() + bar.get_height()/2, f'{val:,}', va='center', fontsize=9)
+    ax.set_xlabel('Rides', fontsize=9)
+    ax.tick_params(labelsize=8)
+    ax.spines[['top','right','left']].set_visible(False)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+
+# Top routes (pickup to dropoff)
+st.markdown('<p class="section-header">Top 10 Routes (Pickup → Dropoff)</p>', unsafe_allow_html=True)
+routes = successful.groupby(['Pickup_Location', 'Drop_Location']).size().reset_index(name='Rides')
+routes_top = routes.nlargest(10, 'Rides').sort_values('Rides', ascending=True)
+routes_top['Route'] = routes_top['Pickup_Location'] + ' → ' + routes_top['Drop_Location']
+
+fig, ax = styled_fig(12, 4)
+bars = ax.barh(routes_top['Route'], routes_top['Rides'], color='#2ecc71', edgecolor='none')
+for bar, val in zip(bars, routes_top['Rides']):
+    ax.text(val + 10, bar.get_y() + bar.get_height()/2, f'{val:,}', va='center', fontsize=9)
+ax.set_xlabel('Rides', fontsize=9)
+ax.tick_params(labelsize=8)
+ax.spines[['top','right','left']].set_visible(False)
+plt.tight_layout()
+st.pyplot(fig)
+plt.close()
+
+
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+
 
 
