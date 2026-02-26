@@ -111,18 +111,31 @@ def load_data(path):
 
 # ---------- LOAD DATA ----------
 DATA_PATH = "Bookings.csv"
+bundled_ok = os.path.exists(DATA_PATH)
 
-if os.path.exists(DATA_PATH):
+# ---------- SIDEBAR ----------
+st.sidebar.header("🗂️ Data Controls")
+
+if bundled_ok:
     df_raw = load_data(DATA_PATH)
-    st.sidebar.info("Using bundled dataset")
+    st.sidebar.info("🔒 Dataset Pre-Loaded — No Upload Needed")
+    st.sidebar.file_uploader("", type="csv", label_visibility="collapsed", disabled=True)
+    st.sidebar.success("📂 Dataset Loaded")
 else:
-    st.error("Dataset not found. Please ensure the CSV is in the repository.")
-    st.stop()
+    st.sidebar.warning("⚠️ Bundled dataset not found. Please upload the CSV.")
+    uploaded_file = st.sidebar.file_uploader("", type="csv", label_visibility="collapsed")
+    if uploaded_file is not None:
+        df_raw = pd.read_csv(uploaded_file)
+        df_raw.drop(columns=['Vehicle Images', 'Unnamed: 20'], inplace=True, errors='ignore')
+        df_raw['Date'] = pd.to_datetime(df_raw['Date'], errors='coerce')
+        df_raw['Hour'] = df_raw['Date'].dt.hour
+        df_raw['Day_of_Week'] = df_raw['Date'].dt.day_name()
+        df_raw['Booking_Value'] = pd.to_numeric(df_raw['Booking_Value'], errors='coerce')
+        df_raw['Ride_Distance'] = pd.to_numeric(df_raw['Ride_Distance'], errors='coerce')
+        st.sidebar.success("📂 Dataset Loaded")
+    else:
+        st.stop()
 
-
-# ---------- SIDEBAR FILTERS ----------
-st.sidebar.header("Data")
-st.sidebar.file_uploader("Upload Bookings CSV", type="csv", disabled=True)
 st.sidebar.markdown("---")
 st.sidebar.header("Filters")
 
@@ -450,3 +463,4 @@ else:
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray; font-size:0.8rem;'>MBA Data Portfolio</p>", unsafe_allow_html=True)
+
