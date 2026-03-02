@@ -27,7 +27,7 @@ Prime Sedan generates the highest revenue per ride but has the widest spread bet
 Customer cancellations spike during evening peak hours (5–9 PM) — the same window where Prime Sedan demand is highest. This is not a demand problem; it is a supply-response failure. Improving driver availability and incentive structures in this window is the single highest-leverage operational fix available.
 
 **3. Peak vs. Off-Peak Ride Distance — T-Test Finding**
-Statistical testing confirms [significant / no significant] difference in average ride distances between peak and off-peak hours (p = [0.080046]).
+Statistical testing confirms [significant / no significant] difference in average ride distances between peak and off-peak hours (p = 0.080046).
 - **If significant:** Peak-hour demand skews toward longer, higher-value trips — validating dynamic surge pricing as both a revenue and supply-management tool.
 - **If not significant:** Trip intent does not change during peak hours, meaning cancellations — not trip length — are the primary operational problem to solve.
 
@@ -130,3 +130,4 @@ streamlit run streamlit.py
 ---
 
 **Developed by Daksh Sharma** | *Data Analytics & Business Intelligence Portfolio*
+
